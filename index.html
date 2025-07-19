@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fresh Mobile Currency Converter</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            height: 100vh;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfccb 25%, #f0f9ff 50%, #faf5ff 75%, #fdf2f8 100%);
+            background-attachment: fixed;
+            overflow: hidden;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+        }
+        
+        .currency-btn {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            border: 2px solid rgba(34, 197, 94, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .currency-btn:hover {
+            background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%);
+            border-color: rgba(34, 197, 94, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .amount-btn {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            color: #1e40af;
+            font-weight: 600;
+        }
+        
+        .amount-btn:hover {
+            background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
+            border-color: rgba(59, 130, 246, 0.4);
+            transform: scale(1.05);
+        }
+        
+        .swap-btn {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid rgba(245, 158, 11, 0.3);
+            color: #92400e;
+        }
+        
+        .swap-btn:hover {
+            background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
+            transform: rotate(180deg);
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+            border: 2px solid rgba(168, 85, 247, 0.2);
+        }
+        
+        .input-field {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(34, 197, 94, 0.2);
+            border-radius: 16px;
+            color: #065f46;
+            font-size: 28px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: rgba(34, 197, 94, 0.5);
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .history-item {
+            background: rgba(255, 255, 255, 0.6);
+            border-left: 4px solid #10b981;
+            backdrop-filter: blur(10px);
+        }
+        
+        .flag-icon {
+            width: 28px;
+            height: 20px;
+            border-radius: 4px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="p-4 flex flex-col">
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <h1 class="text-2xl font-bold text-gray-800 mb-1">
+            <i class="fas fa-exchange-alt text-green-500 mr-2"></i>
+            Currency Converter
+        </h1>
+        <p class="text-gray-600 text-sm">Fresh & Mobile-Friendly</p>
+    </div>
+
+    <!-- Main Conversion Card -->
+    <div class="glass-card rounded-3xl p-5 mb-4 flex-shrink-0">
+        <!-- Amount Input -->
+        <div class="mb-4">
+            <input 
+                type="number" 
+                id="amount" 
+                placeholder="100" 
+                class="input-field w-full py-3 px-4"
+                oninput="convertCurrency()"
+                value="100"
+            >
+        </div>
+
+        <!-- Quick Amount Buttons -->
+        <div class="grid grid-cols-4 gap-2 mb-4">
+            <button onclick="setAmount(1)" class="amount-btn py-2 px-3 rounded-xl text-sm transition-all">1</button>
+            <button onclick="setAmount(50)" class="amount-btn py-2 px-3 rounded-xl text-sm transition-all">50</button>
+            <button onclick="setAmount(100)" class="amount-btn py-2 px-3 rounded-xl text-sm transition-all">100</button>
+            <button onclick="setAmount(500)" class="amount-btn py-2 px-3 rounded-xl text-sm transition-all">500</button>
+        </div>
+
+        <!-- Currency Selection Row -->
+        <div class="flex items-center justify-between mb-4">
+            <!-- From Currency -->
+            <button onclick="toggleFromCurrency()" class="currency-btn rounded-2xl p-3 flex-1 mr-2 transition-all">
+                <div class="flex items-center justify-center space-x-2">
+                    <div class="flag-icon" id="fromFlag">USD</div>
+                    <span class="font-semibold text-gray-700" id="fromCode">USD</span>
+                </div>
+            </button>
+
+            <!-- Swap Button -->
+            <button onclick="swapCurrencies()" class="swap-btn rounded-2xl w-12 h-12 flex items-center justify-center transition-all">
+                <i class="fas fa-exchange-alt text-lg"></i>
+            </button>
+
+            <!-- To Currency -->
+            <button onclick="toggleToCurrency()" class="currency-btn rounded-2xl p-3 flex-1 ml-2 transition-all">
+                <div class="flex items-center justify-center space-x-2">
+                    <div class="flag-icon" id="toFlag">EUR</div>
+                    <span class="font-semibold text-gray-700" id="toCode">EUR</span>
+                </div>
+            </button>
+        </div>
+
+        <!-- Result -->
+        <div class="result-card rounded-2xl p-4 text-center">
+            <div class="text-purple-700 text-sm font-medium mb-1">Result</div>
+            <div class="text-purple-900 text-3xl font-bold" id="result">85.00 EUR</div>
+            <div class="text-purple-600 text-xs mt-1" id="rate">1 USD = 0.85 EUR</div>
+        </div>
+    </div>
+
+    <!-- Recent Conversions -->
+    <div class="glass-card rounded-2xl p-4 flex-grow overflow-hidden">
+        <h3 class="text-gray-800 font-semibold text-sm mb-3 flex items-center">
+            <i class="fas fa-history text-green-500 mr-2"></i>
+            Recent Conversions
+        </h3>
+        <div id="history" class="space-y-2 overflow-y-auto max-h-32">
+            <div class="history-item rounded-lg p-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-700 text-xs font-medium">100 USD → 85 EUR</span>
+                    <span class="text-gray-500 text-xs">Just now</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Currency Selection Modal -->
+    <div id="currencyModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-end">
+        <div class="bg-white rounded-t-3xl w-full max-h-80 p-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800">Select Currency</h3>
+                <button onclick="closeCurrencyModal()" class="text-gray-500 text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="currencyList" class="grid grid-cols-2 gap-2 overflow-y-auto max-h-60">
+                <!-- Currency options will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let exchangeRates = {
+            'EUR': 0.85, 'GBP': 0.73, 'JPY': 110.5, 'CHF': 0.92,
+            'CAD': 1.25, 'AUD': 1.35, 'CNY': 6.45, 'INR': 74.5,
+            'KRW': 1180.5, 'SGD': 1.35, 'HKD': 7.8, 'SEK': 8.5,
+            'NOK': 8.8, 'DKK': 6.3, 'PLN': 3.9, 'CZK': 21.5
+        };
+        
+        let conversionHistory = [];
+        let currentSelector = 'from';
+        
+        const currencies = {
+            'USD': 'US Dollar', 'EUR': 'Euro', 'GBP': 'British Pound',
+            'JPY': 'Japanese Yen', 'CHF': 'Swiss Franc', 'CAD': 'Canadian Dollar',
+            'AUD': 'Australian Dollar', 'CNY': 'Chinese Yuan', 'INR': 'Indian Rupee',
+            'KRW': 'South Korean Won', 'SGD': 'Singapore Dollar', 'HKD': 'Hong Kong Dollar',
+            'SEK': 'Swedish Krona', 'NOK': 'Norwegian Krone', 'DKK': 'Danish Krone',
+            'PLN': 'Polish Zloty', 'CZK': 'Czech Koruna'
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            convertCurrency();
+            populateCurrencyList();
+            loadHistory();
+        });
+
+        function convertCurrency() {
+            const amount = parseFloat(document.getElementById('amount').value) || 0;
+            const fromCode = document.getElementById('fromCode').textContent;
+            const toCode = document.getElementById('toCode').textContent;
+            
+            if (amount === 0) {
+                document.getElementById('result').textContent = '0.00 ' + toCode;
+                return;
+            }
+            
+            let result;
+            if (fromCode === 'USD') {
+                result = amount * (exchangeRates[toCode] || 1);
+            } else if (toCode === 'USD') {
+                result = amount / (exchangeRates[fromCode] || 1);
+            } else {
+                const usdAmount = amount / (exchangeRates[fromCode] || 1);
+                result = usdAmount * (exchangeRates[toCode] || 1);
+            }
+            
+            const rate = result / amount;
+            document.getElementById('result').textContent = `${result.toFixed(2)} ${toCode}`;
+            document.getElementById('rate').textContent = `1 ${fromCode} = ${rate.toFixed(4)} ${toCode}`;
+            
+            addToHistory(amount, fromCode, result, toCode);
+        }
+
+        function setAmount(value) {
+            document.getElementById('amount').value = value;
+            convertCurrency();
+            
+            // Visual feedback
+            event.target.classList.add('pulse');
+            setTimeout(() => event.target.classList.remove('pulse'), 1000);
+        }
+
+        function swapCurrencies() {
+            const fromCode = document.getElementById('fromCode').textContent;
+            const toCode = document.getElementById('toCode').textContent;
+            
+            document.getElementById('fromCode').textContent = toCode;
+            document.getElementById('toCode').textContent = fromCode;
+            document.getElementById('fromFlag').textContent = toCode;
+            document.getElementById('toFlag').textContent = fromCode;
+            
+            convertCurrency();
+        }
+
+        function toggleFromCurrency() {
+            currentSelector = 'from';
+            document.getElementById('currencyModal').classList.remove('hidden');
+        }
+
+        function toggleToCurrency() {
+            currentSelector = 'to';
+            document.getElementById('currencyModal').classList.remove('hidden');
+        }
+
+        function closeCurrencyModal() {
+            document.getElementById('currencyModal').classList.add('hidden');
+        }
+
+        function populateCurrencyList() {
+            const list = document.getElementById('currencyList');
+            list.innerHTML = '';
+            
+            Object.entries(currencies).forEach(([code, name]) => {
+                const button = document.createElement('button');
+                button.className = 'currency-btn rounded-xl p-3 text-left transition-all';
+                button.onclick = () => selectCurrency(code);
+                
+                button.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <div class="flag-icon">${code}</div>
+                        <div>
+                            <div class="font-semibold text-gray-700 text-sm">${code}</div>
+                            <div class="text-gray-500 text-xs">${name}</div>
+                        </div>
+                    </div>
+                `;
+                
+                list.appendChild(button);
+            });
+        }
+
+        function selectCurrency(code) {
+            const name = currencies[code];
+            
+            if (currentSelector === 'from') {
+                document.getElementById('fromCode').textContent = code;
+                document.getElementById('fromFlag').textContent = code;
+            } else {
+                document.getElementById('toCode').textContent = code;
+                document.getElementById('toFlag').textContent = code;
+            }
+            
+            closeCurrencyModal();
+            convertCurrency();
+        }
+
+        function addToHistory(fromAmount, fromCode, toAmount, toCode) {
+            const historyItem = {
+                from: `${fromAmount} ${fromCode}`,
+                to: `${toAmount.toFixed(2)} ${toCode}`,
+                time: 'Just now'
+            };
+            
+            conversionHistory.unshift(historyItem);
+            conversionHistory = conversionHistory.slice(0, 5); // Keep only 5 recent
+            updateHistoryDisplay();
+            saveHistory();
+        }
+
+        function updateHistoryDisplay() {
+            const historyContainer = document.getElementById('history');
+            historyContainer.innerHTML = '';
+            
+            if (conversionHistory.length === 0) {
+                historyContainer.innerHTML = '<div class="text-gray-500 text-center text-sm py-2">No conversions yet</div>';
+                return;
+            }
+            
+            conversionHistory.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'history-item rounded-lg p-2';
+                div.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700 text-xs font-medium">${item.from} → ${item.to}</span>
+                        <span class="text-gray-500 text-xs">${item.time}</span>
+                    </div>
+                `;
+                historyContainer.appendChild(div);
+            });
+        }
+
+        function saveHistory() {
+            localStorage.setItem('currencyHistory', JSON.stringify(conversionHistory));
+        }
+
+        function loadHistory() {
+            const saved = localStorage.getItem('currencyHistory');
+            if (saved) {
+                conversionHistory = JSON.parse(saved);
+                updateHistoryDisplay();
+            }
+        }
+
+        // Touch gestures
+        let touchStartY = 0;
+        document.addEventListener('touchstart', function(e) {
+            touchStartY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchend', function(e) {
+            const touchEndY = e.changedTouches[0].clientY;
+            const diff = touchStartY - touchEndY;
+            
+            if (diff < -50 && touchStartY < 100) {
+                // Pull to refresh
+                location.reload();
+            }
+        });
+
+        // Close modal on outside click
+        document.getElementById('currencyModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCurrencyModal();
+            }
+        });
+    </script>
+</body>
+</html>
